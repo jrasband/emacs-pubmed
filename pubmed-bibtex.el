@@ -659,19 +659,19 @@ are appended to the end of the file."
 (defun pubmed-bibtex--summaries (uids)
   "Return list of summaries of UIDS."
   (let ((url-request-method "POST")
-	(url-request-extra-headers `(("Content-Type" . ,#'"application/x-www-form-urlencoded")))
-	(url-request-data (concat "db=pubmed"
-				  "&retmode=xml"
-				  "&rettype=abstract"
-				  "&id=" (if (listp uids)
-					     (s-join "," uids)
-					   uids)
-				  (when (not (string-empty-p pubmed-api-key))
-				    (concat "&api_key=" pubmed-api-key)))))
-    (with-current-buffer (url-retrieve-synchronously pubmed-efetch-url)
+	    (url-request-extra-headers `(("Content-Type" . ,#'"application/x-www-form-urlencoded")))
+	    (url-request-data (concat "db=pubmed"
+				                  "&retmode=xml"
+				                  "&rettype=abstract"
+				                  "&id=" (if (listp uids)
+					                         (s-join "," uids)
+					                       uids)
+				                  (when (not (string-empty-p pubmed-api-key))
+				                    (concat "&api_key=" pubmed-api-key)))))
+    (with-current-buffer (url-retrieve-synchronously (concat pubmed-efetch-url "?" url-request-data))
       (let* ((dom (libxml-parse-xml-region (1+ url-http-end-of-headers) (point-max)))
-	     (summaries (esxml-node-children (esxml-query "PubmedArticleSet" dom))))
-	summaries))))
+	         (summaries (esxml-node-children (esxml-query "PubmedArticleSet" dom))))
+	    summaries))))
 
 (defun pubmed-bibtex--insert (summary)
   "Insert the BibTeX reference of SUMMARY in the current buffer."
